@@ -20,6 +20,7 @@
   test_wrapped_intervals
   test_irreducible_loops
   test_lattice_collections
+  test_rg_gen
   test_dsa)
  (preprocess
   (pps ppx_here ppx_deriving.show))

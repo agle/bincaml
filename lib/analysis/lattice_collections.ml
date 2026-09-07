@@ -59,7 +59,13 @@ module type MapKey = sig
   val pretty : t -> Containers_pp.t
 end
 
-(** Lattice map type with a specified Top value *)
+(** Lattice which maps every value of type K in the universe to some value in V.
+    Useful, for example, for representing non-relational value domains where the
+    set of program variables is not known in advance.
+
+    All binary operations are defined component-wise. The meaning, or
+    "concretisation" of a lattice element is defined by the user lattice, and
+    care should be taken to ensure correct use w.r.t. this concretisation. *)
 module LatticeMap (K : MapKey) (V : TopLattice) = struct
   include (
     struct
@@ -151,11 +157,11 @@ module LatticeMap (K : MapKey) (V : TopLattice) = struct
 
       let bot_binop f a b =
         match (a, b) with
-        | BotMap a, BotMap b -> BotMap (KM.idempotent_union (const f) a b)
-        | BotMap a, TopMap b | TopMap b, BotMap a ->
-            BotMap (KM.difference (bot_v_op f) b a)
-        | TopMap a, TopMap b ->
+        | BotMap a, BotMap b ->
             BotMap (KM.idempotent_inter_filter (bot_v_op f) a b)
+        | BotMap a, TopMap b | TopMap b, BotMap a ->
+            BotMap (KM.difference (bot_v_op f) a b)
+        | TopMap a, TopMap b -> TopMap (KM.idempotent_union (const f) a b)
 
       let top_binop f a b =
         match (a, b) with
@@ -168,6 +174,10 @@ module LatticeMap (K : MapKey) (V : TopLattice) = struct
       let join = top_binop V.join
       let widening = top_binop V.widening
       let narrowing = bot_binop V.narrowing
+
+      let contains_bot = function
+        | BotMap _ -> true
+        | TopMap m -> not @@ KM.for_all (fun _ v -> not @@ V.equal v V.bottom) m
 
       let read k = function
         | BotMap m -> KM.find_opt k m |> Option.get_or ~default:V.bottom
@@ -227,6 +237,8 @@ module LatticeMap (K : MapKey) (V : TopLattice) = struct
         val singleton : K.t -> V.t -> t
         val mapi : (K.t -> V.t -> V.t) -> t -> t
         val fold : (K.t -> V.t -> 'a -> 'a) -> t -> 'a -> 'a
+        val bot_binop : (V.t -> V.t -> V.t) -> t -> t -> t
+        val contains_bot : t -> bool
       end)
 
   module V = V

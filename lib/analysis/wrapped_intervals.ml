@@ -222,6 +222,8 @@ module WrappedIntervalsLattice = struct
           [ interval bl au ]
         else []
 
+  let meet a b = lub (intersect a b)
+
   let nsplit ~width t =
     match t with
     | Bot -> []
@@ -785,7 +787,7 @@ module Domain = struct
     let vs = Lang.Procedure.formal_in_params p |> StringMap.values in
     vs
     |> Iter.map (fun v -> (v, top_val))
-    |> Iter.fold (fun m (v, d) -> update v d m) bottom
+    |> Iter.fold (fun m (v, d) -> update v d m) top
 
   open struct
     type bin_pred =
@@ -1031,4 +1033,4 @@ prog entry @main;
   print_endline @@ StateAbstraction.show r;
   (* l_6->[0x101, 0x101] we infer an exact value! *)
   [%expect
-    {| (l_1->⟦0x0:bv64, 0x0:bv64⟧, l_4->⟦0x8000000000000032:bv64, 0x101:bv64⟧, l_2->⟦0x8000000000000031:bv64, 0x101:bv64⟧, l_3->⟦0x8000000000000031:bv64, 0x100:bv64⟧, l_5->⟦0x8000000000000032:bv64, 0x101:bv64⟧, l_6->⟦0x101:bv64, 0x101:bv64⟧, _->⊥) |}]
+    {| (l_1->⟦0x0:bv64, 0x0:bv64⟧, l_4->⟦0x8000000000000032:bv64, 0x101:bv64⟧, l_2->⟦0x8000000000000031:bv64, 0x101:bv64⟧, l_3->⟦0x8000000000000031:bv64, 0x100:bv64⟧, l_5->⟦0x8000000000000032:bv64, 0x101:bv64⟧, l_6->⟦0x101:bv64, 0x101:bv64⟧, _->⊤) |}]
