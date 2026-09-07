@@ -452,6 +452,9 @@ module Rewriter = struct
         Some (binexp ~op:`BVULT e' e)
     | HI { c = Sum (e, e') as c; z } when equiv_computations c z ->
         Some (binexp ~op:`BVULT (unexp ~op:`BVNEG e') e)
+    | HI { c = Never; z = Expr e } -> Some (boolconst false)
+    | HI { c = Always; z = Expr e } ->
+        zero_of e |> Option.map (fun zero -> binexp ~op:`BVULT zero e)
     | GE { n = Diff (e, e') as c; v } when equiv_computations c v ->
         Some (binexp ~op:`BVSLE e' e)
     | GE { n = Sum (e, e') as c; v } when equiv_computations c v ->
