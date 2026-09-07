@@ -1,0 +1,5 @@
+(load-il "branch_conditions.il")
+(run-transforms "aslp-semantics")
+(dump-il "branch_conditions_pre.il")
+(run-transforms "branch-conditions")
+(dump-il "branch_conditions_post.il")
