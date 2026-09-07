@@ -17,19 +17,20 @@ open struct
 end
 
 module FlagSemantics = struct
+  type computation =
+    | Sum of Expr.BasilExpr.t * Expr.BasilExpr.t  (** Computed e1 + e2 *)
+    | Diff of Expr.BasilExpr.t * Expr.BasilExpr.t  (** Computed e1 - e2 *)
+    | Expr of Expr.BasilExpr.t  (** The result of evaluating an expr *)
+    | Always
+    | Never
+  [@@deriving eq, ord, show { with_path = false }]
+
   type t =
     | Const of computation
     | O of computation  (** Overflow from computation *)
     | C of computation  (** Carry from computation *)
     | Z of computation  (** When computation is zero *)
     | N of computation  (** When computation is negative *)
-
-  and computation =
-    | Sum of Expr.BasilExpr.t * Expr.BasilExpr.t  (** Computed e1 + e2 *)
-    | Diff of Expr.BasilExpr.t * Expr.BasilExpr.t  (** Computed e1 - e2 *)
-    | Expr of Expr.BasilExpr.t  (** The result of evaluating an expr *)
-    | Always
-    | Never
   [@@deriving eq, ord, show { with_path = false }]
 
   let equiv_computations c c' =
