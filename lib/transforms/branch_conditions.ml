@@ -374,6 +374,7 @@ module Rewriter = struct
         v : FlagSemantics.computation;
         z : FlagSemantics.computation;
       }
+    | AL
     | Not of t
     | Top  (** Unknown condition type *)
   [@@deriving show { with_path = false }]
@@ -393,6 +394,8 @@ module Rewriter = struct
         | V (N n), V (Const Always) -> MI { n }
         | V (V v), V (Const Always) -> VS { v }
         | V (N n), V (V v | Const v) -> GE { n; v }
+        | V (Const Always), V (Const Always) -> AL
+        | V (Const Never), V (Const Always) -> Not AL
         | _ -> Top)
     | ApplyIntrin
         {
@@ -409,7 +412,8 @@ module Rewriter = struct
         let c = Eval.eval (flip FlagDomain.read m) c in
         let d = Eval.eval (flip FlagDomain.read m) d in
         match (a, b, c, d) with
-        | V (C c), V (Const Always), V (Z z), V (Const Never) -> HI { c; z }
+        | V (C c | Const c), V (Const Always), V (Z z), V (Const Never) ->
+            HI { c; z }
         | V (N n), V (V v | Const v), V (Z z), V (Const Never) -> GT { n; v; z }
         | _ -> Top)
     | UnaryExpr { op = `BoolNOT; arg } -> (
@@ -464,6 +468,7 @@ module Rewriter = struct
     | GT { n; v = Never; z } when equiv_computations n z ->
         let e = value n in
         zero_of e |> Option.map (fun zero -> binexp ~op:`BVSLT zero e)
+    | AL -> Some (boolconst true)
     | Not cond -> (
         let open Expr.AbstractExpr in
         match condition_expr cond with
@@ -475,6 +480,7 @@ module Rewriter = struct
             Some (binexp ~op:`BVSLT arg2 arg1)
         | Some (E (BinaryExpr { op = `BVSLT; arg1; arg2 })) ->
             Some (binexp ~op:`BVSLE arg2 arg1)
+        | Some (E (Constant { const = `Bool b })) -> Some (boolconst (not b))
         | Some e -> Some (Expr.BasilExpr.boolnot e)
         | None -> None)
     | _ -> None
