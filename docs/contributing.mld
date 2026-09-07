@@ -392,10 +392,11 @@ Also consider reviewing the {{:https://ocaml.org/manual/5.3/index.html}OCaml man
 
 {4 OCaml code search }
 
-opam package Search by type signature: {{:https://doc.sherlocode.com}https://doc.sherlocode.com}
+Opam package search by type signature or name: {{:https://doc.sherlocode.com}https://doc.sherlocode.com}
 
-full source search of opam reposotiry {{:https://sherlocode.com/}https://sherlocode.com/}
+Full source search of opam repository: {{:https://sherlocode.com/}https://sherlocode.com/}
 
+We also host docs for Bincaml and its dependencies: {: https://uq-pac.github.io/bincaml/index.html}
 
 {3 Setting up ocaml: }
 
@@ -403,17 +404,15 @@ We recommend you install the language server and dev setup packages:
 
 {v
 opam install ocaml-lsp-server
-opam install --deps-only --with-dev-setup .
+opam install --deps-only --with-dev-setup --with-test .
 v}
 
-[--with-dev-setup] includes [ocamlformat], [odig], [sherlodoc] this is useful for documentation search.
-
-Use the following to build and open the documentation page for an installed package, here [containers]:
+Use the following to build the documentation for the bincaml projects and other packages in the switch:
 
 {v
-odig doc containers
+dune build @doc-new _build/default/_doc_new/html/docs
 v}
-
+You will then be able to view the docs by opening `_build/default/_doc_new/html/docs/index.html`.
 
 It is good practice to hide implementations by interfaces, however in practice this often requires
 a significant amount of code rewriting to define the module and its interface separately.

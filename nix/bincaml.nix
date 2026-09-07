@@ -48,7 +48,6 @@
   z3-bin, # custom name for z3 binary, since `z3` is the ocaml library
 
   # dev:
-  # , odig
   # , sherlodoc
   # , ocaml-lsp-server
   # , ocamlformat

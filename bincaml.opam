@@ -44,8 +44,8 @@ depends: [
   "kittyimg"
   "terminal_size"
   "ocamlformat" {= "0.29.0" & with-dev-setup}
-  "ocaml-lsp-server" {with-dev-setup}
   "odoc-driver" {with-doc}
+  "sherlodoc" {with-doc}
   "ppx_expect"
   "alcotest" {with-test}
   "odoc" {with-doc}
