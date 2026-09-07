@@ -6,102 +6,361 @@
   (run-transforms branch-conditions)
   (dump-il branch_conditions_post.il)
 
-  $ diff branch_conditions_pre.il branch_conditions_post.il
-  48c48
+  $ diff branch_conditions_pre.il branch_conditions_post.il | grep '[<|>]'
   <      assume eq($PSTATE_Z, 0x1:bv1);
-  ---
   >      assume eq($R3, $R4);
-  53c53
   <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
-  ---
   >      assume boolnot(eq($R3, $R4));
-  69c69
   <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
-  ---
   >      assume boolnot(eq($R3, $R4));
-  74c74
   <      assume boolnot(boolnot(eq($PSTATE_Z, 0x1:bv1)));
-  ---
   >      assume eq($R3, $R4);
-  90c90
   <      assume eq($PSTATE_C, 0x1:bv1);
-  ---
   >      assume bvule($R4, $R3);
-  95c95
   <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
-  ---
   >      assume bvult($R3, $R4);
-  111c111
   <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
-  ---
   >      assume bvult($R3, $R4);
-  116c116
   <      assume boolnot(boolnot(eq($PSTATE_C, 0x1:bv1)));
-  ---
   >      assume bvule($R4, $R3);
-  132c132
   <      assume eq($PSTATE_N, 0x1:bv1);
-  ---
   >      assume bvslt(bvsub($R3, $R4), 0x0:bv64);
-  137c137
   <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
-  ---
   >      assume bvsle(0x0:bv64, bvsub($R3, $R4));
-  153c153
   <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
-  ---
   >      assume bvsle(0x0:bv64, bvsub($R3, $R4));
-  158c158
   <      assume boolnot(boolnot(eq($PSTATE_N, 0x1:bv1)));
-  ---
   >      assume bvslt(bvsub($R3, $R4), 0x0:bv64);
-  216c216
   <      assume booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1));
-  ---
   >      assume bvult($R4, $R3);
-  221c221
   <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
-  ---
   >      assume bvule($R3, $R4);
-  237c237
   <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
-  ---
   >      assume bvule($R3, $R4);
-  242c242
   <      assume boolnot(boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1))));
-  ---
   >      assume bvult($R4, $R3);
-  258c258
   <      assume eq($PSTATE_N, $PSTATE_V);
-  ---
   >      assume bvsle($R4, $R3);
-  263c263
   <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
-  ---
   >      assume bvslt($R3, $R4);
-  279c279
   <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
-  ---
   >      assume bvslt($R3, $R4);
-  284c284
   <      assume boolnot(boolnot(eq($PSTATE_N, $PSTATE_V)));
-  ---
   >      assume bvsle($R4, $R3);
-  300c300
   <      assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1));
-  ---
   >      assume bvslt($R4, $R3);
-  305c305
   <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
-  ---
   >      assume bvsle($R3, $R4);
-  321c321
   <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
-  ---
   >      assume bvsle($R3, $R4);
-  326,327c326
   <      assume boolnot(boolnot(booland(eq($PSTATE_N, $PSTATE_V),
   <         eq($PSTATE_Z, 0x0:bv1))));
-  ---
   >      assume bvslt($R4, $R3);
-  [1]
+  <      assume eq($PSTATE_Z, 0x1:bv1);
+  >      assume eq($R3, 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, 0x0:bv64));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, 0x0:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_Z, 0x1:bv1)));
+  >      assume eq($R3, 0x0:bv64);
+  <      assume eq($PSTATE_N, 0x1:bv1);
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume boolnot(boolnot(eq($PSTATE_N, 0x1:bv1)));
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume eq($PSTATE_N, $PSTATE_V);
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume boolnot(boolnot(eq($PSTATE_N, $PSTATE_V)));
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvslt(0x0:bv64, $R3);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, 0x0:bv64);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, 0x0:bv64);
+  <      assume boolnot(boolnot(booland(eq($PSTATE_N, $PSTATE_V),
+  <         eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvslt(0x0:bv64, $R3);
+  <      assume eq($PSTATE_Z, 0x1:bv1);
+  >      assume eq($R3, 0x1:bv64);
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, 0x1:bv64));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, 0x1:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_Z, 0x1:bv1)));
+  >      assume eq($R3, 0x1:bv64);
+  <      assume eq($PSTATE_C, 0x1:bv1);
+  >      assume bvule(0x1:bv64, $R3);
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult($R3, 0x1:bv64);
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult($R3, 0x1:bv64);
+  <      assume boolnot(boolnot(eq($PSTATE_C, 0x1:bv1)));
+  >      assume bvule(0x1:bv64, $R3);
+  <      assume eq($PSTATE_N, 0x1:bv1);
+  >      assume bvslt(bvsub($R3, 0x1:bv64), 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvsub($R3, 0x1:bv64));
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvsub($R3, 0x1:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_N, 0x1:bv1)));
+  >      assume bvslt(bvsub($R3, 0x1:bv64), 0x0:bv64);
+  <      assume booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvult(0x1:bv64, $R3);
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule($R3, 0x1:bv64);
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule($R3, 0x1:bv64);
+  <      assume boolnot(boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvult(0x1:bv64, $R3);
+  <      assume eq($PSTATE_N, $PSTATE_V);
+  >      assume bvsle(0x1:bv64, $R3);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, 0x1:bv64);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, 0x1:bv64);
+  <      assume boolnot(boolnot(eq($PSTATE_N, $PSTATE_V)));
+  >      assume bvsle(0x1:bv64, $R3);
+  <      assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvslt(0x1:bv64, $R3);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, 0x1:bv64);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, 0x1:bv64);
+  <      assume boolnot(boolnot(booland(eq($PSTATE_N, $PSTATE_V),
+  <         eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvslt(0x1:bv64, $R3);
+  <      assume eq($PSTATE_Z, 0x1:bv1);
+  >      assume eq($R3, bvneg($R4));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, bvneg($R4)));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, bvneg($R4)));
+  <      assume boolnot(boolnot(eq($PSTATE_Z, 0x1:bv1)));
+  >      assume eq($R3, bvneg($R4));
+  <      assume eq($PSTATE_C, 0x1:bv1);
+  >      assume bvule(bvneg($R4), $R3);
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult($R3, bvneg($R4));
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult($R3, bvneg($R4));
+  <      assume boolnot(boolnot(eq($PSTATE_C, 0x1:bv1)));
+  >      assume bvule(bvneg($R4), $R3);
+  <      assume eq($PSTATE_N, 0x1:bv1);
+  >      assume bvslt(bvadd($R3, $R4), 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvadd($R3, $R4));
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvadd($R3, $R4));
+  <      assume boolnot(boolnot(eq($PSTATE_N, 0x1:bv1)));
+  >      assume bvslt(bvadd($R3, $R4), 0x0:bv64);
+  <      assume booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvult(bvneg($R4), $R3);
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule($R3, bvneg($R4));
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule($R3, bvneg($R4));
+  <      assume boolnot(boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvult(bvneg($R4), $R3);
+  <      assume eq($PSTATE_N, $PSTATE_V);
+  >      assume bvsle(bvneg($R4), $R3);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, bvneg($R4));
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, bvneg($R4));
+  <      assume boolnot(boolnot(eq($PSTATE_N, $PSTATE_V)));
+  >      assume bvsle(bvneg($R4), $R3);
+  <      assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvslt(bvneg($R4), $R3);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, bvneg($R4));
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, bvneg($R4));
+  <      assume boolnot(boolnot(booland(eq($PSTATE_N, $PSTATE_V),
+  <         eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvslt(bvneg($R4), $R3);
+  <      assume eq($PSTATE_Z, 0x1:bv1);
+  >      assume eq($R3, 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, 0x0:bv64));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, 0x0:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_Z, 0x1:bv1)));
+  >      assume eq($R3, 0x0:bv64);
+  <      assume eq($PSTATE_N, 0x1:bv1);
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume boolnot(boolnot(eq($PSTATE_N, 0x1:bv1)));
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume eq($PSTATE_N, $PSTATE_V);
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, 0x0:bv64);
+  <      assume boolnot(boolnot(eq($PSTATE_N, $PSTATE_V)));
+  >      assume bvsle(0x0:bv64, $R3);
+  <      assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvslt(0x0:bv64, $R3);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, 0x0:bv64);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, 0x0:bv64);
+  <      assume boolnot(boolnot(booland(eq($PSTATE_N, $PSTATE_V),
+  <         eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvslt(0x0:bv64, $R3);
+  <      assume eq($PSTATE_Z, 0x1:bv1);
+  >      assume eq($R3, bvneg(0x1:bv64));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, bvneg(0x1:bv64)));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq($R3, bvneg(0x1:bv64)));
+  <      assume boolnot(boolnot(eq($PSTATE_Z, 0x1:bv1)));
+  >      assume eq($R3, bvneg(0x1:bv64));
+  <      assume eq($PSTATE_C, 0x1:bv1);
+  >      assume bvule(bvneg(0x1:bv64), $R3);
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult($R3, bvneg(0x1:bv64));
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult($R3, bvneg(0x1:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_C, 0x1:bv1)));
+  >      assume bvule(bvneg(0x1:bv64), $R3);
+  <      assume eq($PSTATE_N, 0x1:bv1);
+  >      assume bvslt(bvadd($R3, 0x1:bv64), 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvadd($R3, 0x1:bv64));
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvadd($R3, 0x1:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_N, 0x1:bv1)));
+  >      assume bvslt(bvadd($R3, 0x1:bv64), 0x0:bv64);
+  <      assume booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvult(bvneg(0x1:bv64), $R3);
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule($R3, bvneg(0x1:bv64));
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule($R3, bvneg(0x1:bv64));
+  <      assume boolnot(boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvult(bvneg(0x1:bv64), $R3);
+  <      assume eq($PSTATE_N, $PSTATE_V);
+  >      assume bvsle(bvneg(0x1:bv64), $R3);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, bvneg(0x1:bv64));
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt($R3, bvneg(0x1:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_N, $PSTATE_V)));
+  >      assume bvsle(bvneg(0x1:bv64), $R3);
+  <      assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvslt(bvneg(0x1:bv64), $R3);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, bvneg(0x1:bv64));
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle($R3, bvneg(0x1:bv64));
+  <      assume boolnot(boolnot(booland(eq($PSTATE_N, $PSTATE_V),
+  <         eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvslt(bvneg(0x1:bv64), $R3);
+  <      assume eq($PSTATE_Z, 0x1:bv1);
+  >      assume eq(local_180:bv64, local_181:bv64);
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq(local_180:bv64, local_181:bv64));
+  <      assume boolnot(eq($PSTATE_Z, 0x1:bv1));
+  >      assume boolnot(eq(local_180:bv64, local_181:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_Z, 0x1:bv1)));
+  >      assume eq(local_180:bv64, local_181:bv64);
+  <      assume eq($PSTATE_C, 0x1:bv1);
+  >      assume bvule(local_181:bv64, local_180:bv64);
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult(local_180:bv64, local_181:bv64);
+  <      assume boolnot(eq($PSTATE_C, 0x1:bv1));
+  >      assume bvult(local_180:bv64, local_181:bv64);
+  <      assume boolnot(boolnot(eq($PSTATE_C, 0x1:bv1)));
+  >      assume bvule(local_181:bv64, local_180:bv64);
+  <      assume eq($PSTATE_N, 0x1:bv1);
+  >      assume bvslt(bvsub(local_180:bv64, local_181:bv64), 0x0:bv64);
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvsub(local_180:bv64, local_181:bv64));
+  <      assume boolnot(eq($PSTATE_N, 0x1:bv1));
+  >      assume bvsle(0x0:bv64, bvsub(local_180:bv64, local_181:bv64));
+  <      assume boolnot(boolnot(eq($PSTATE_N, 0x1:bv1)));
+  >      assume bvslt(bvsub(local_180:bv64, local_181:bv64), 0x0:bv64);
+  <      assume booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvult(local_181:bv64, local_180:bv64);
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule(local_180:bv64, local_181:bv64);
+  <      assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvule(local_180:bv64, local_181:bv64);
+  <      assume boolnot(boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvult(local_181:bv64, local_180:bv64);
+  <      assume eq($PSTATE_N, $PSTATE_V);
+  >      assume bvsle(local_181:bv64, local_180:bv64);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt(local_180:bv64, local_181:bv64);
+  <      assume boolnot(eq($PSTATE_N, $PSTATE_V));
+  >      assume bvslt(local_180:bv64, local_181:bv64);
+  <      assume boolnot(boolnot(eq($PSTATE_N, $PSTATE_V)));
+  >      assume bvsle(local_181:bv64, local_180:bv64);
+  <      assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1));
+  >      assume bvslt(local_181:bv64, local_180:bv64);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle(local_180:bv64, local_181:bv64);
+  <      assume boolnot(booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)));
+  >      assume bvsle(local_180:bv64, local_181:bv64);
+  <      assume boolnot(boolnot(booland(eq($PSTATE_N, $PSTATE_V),
+  <         eq($PSTATE_Z, 0x0:bv1))));
+  >      assume bvslt(local_181:bv64, local_180:bv64);
+
+  $ grep "assume.*\$PSTATE" branch_conditions_post.il
+       assume eq($PSTATE_V, 0x1:bv1);
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_V, 0x1:bv1)));
+       assume eq($PSTATE_C, 0x1:bv1);
+       assume boolnot(eq($PSTATE_C, 0x1:bv1));
+       assume boolnot(eq($PSTATE_C, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_C, 0x1:bv1)));
+       assume eq($PSTATE_V, 0x1:bv1);
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_V, 0x1:bv1)));
+       assume booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1));
+       assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+       assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+       assume boolnot(boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1))));
+       assume eq($PSTATE_V, 0x1:bv1);
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_V, 0x1:bv1)));
+       assume eq($PSTATE_V, 0x1:bv1);
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_V, 0x1:bv1)));
+       assume eq($PSTATE_C, 0x1:bv1);
+       assume boolnot(eq($PSTATE_C, 0x1:bv1));
+       assume boolnot(eq($PSTATE_C, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_C, 0x1:bv1)));
+       assume eq($PSTATE_V, 0x1:bv1);
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_V, 0x1:bv1)));
+       assume booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1));
+       assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+       assume boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1)));
+       assume boolnot(boolnot(booland(eq($PSTATE_C, 0x1:bv1), eq($PSTATE_Z, 0x0:bv1))));
+       assume eq($PSTATE_V, 0x1:bv1);
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_V, 0x1:bv1)));
+       assume eq($PSTATE_V, 0x1:bv1);
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(eq($PSTATE_V, 0x1:bv1));
+       assume boolnot(boolnot(eq($PSTATE_V, 0x1:bv1)));
