@@ -195,8 +195,8 @@ module Recursion (O : Fix) = struct
     let alg r x = (alg1 r x, alg2 (map_expr snd x)) in
     fst (fst % map_fold ~f ~alg r, snd % map_fold ~f ~alg r) e
 
-  (** catamorphism that also passes the original expression map_expred through a
-      function argument *)
+  (** catamorphism that also passes the original expression with [map_expr] of a
+      supplied function applied to it *)
   let rec para_f (alg : ('a * 'b) expr -> 'b) f e =
     let p f g x = (f x, g x) in
     (alg % map_expr (p f (para_f alg f)) % unfix) e
