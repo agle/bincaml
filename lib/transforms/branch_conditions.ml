@@ -27,7 +27,7 @@ module FlagSemantics = struct
 
   type t =
     | Const of computation
-    | O of computation  (** Overflow from computation *)
+    | V of computation  (** Overflow from computation *)
     | C of computation  (** Carry from computation *)
     | Z of computation  (** When computation is zero *)
     | N of computation  (** When computation is negative *)
@@ -44,7 +44,7 @@ module FlagSemantics = struct
   (** Determine whether [v] exists in an expression in [f] *)
   let contains_var v f =
     match f with
-    | O c | C c | Z c | N c | Const c -> (
+    | V c | C c | Z c | N c | Const c -> (
         match c with
         | Sum (e1, e2) | Diff (e1, e2) ->
             VarSet.mem v (Expr.BasilExpr.free_vars e1)
@@ -86,8 +86,8 @@ module FlagSemantics = struct
       when s1 = s2 && s1 > 0 && equiv_exp (fix a) (fix c) && sext_eq s1 bv1 bv2
       ->
         if Bitvec.is_negative bv1 then
-          Some (O (Diff (fix a, bvconst (Bitvec.neg bv1))))
-        else Some (O (Sum (fix a, bvconst bv1)))
+          Some (V (Diff (fix a, bvconst (Bitvec.neg bv1))))
+        else Some (V (Sum (fix a, bvconst bv1)))
     | ( UnaryExpr
           {
             op = `SignExtend s1;
@@ -105,7 +105,7 @@ module FlagSemantics = struct
       when s1 = s2 && s2 = s3 && s1 > 0
            && equiv_exp (fix a) (fix c)
            && equiv_exp (fix b) (fix d) ->
-        Some (O (Sum (fix a, fix b)))
+        Some (V (Sum (fix a, fix b)))
     | ( UnaryExpr
           {
             op = `SignExtend s1;
@@ -120,7 +120,7 @@ module FlagSemantics = struct
       when s1 = s2 && s2 = s3 && s1 > 0
            && equiv_exp (fix a) (fix c)
            && equiv_exp (fix b) (fix d) ->
-        Some (O (Diff (fix a, fix b)))
+        Some (V (Diff (fix a, fix b)))
     | ( UnaryExpr
           {
             op = `ZeroExtend z1;
@@ -391,8 +391,8 @@ module Rewriter = struct
         | V (Z z), V (Const Always) -> EQ { z }
         | V (C c), V (Const Always) -> CS { c }
         | V (N n), V (Const Always) -> MI { n }
-        | V (O v), V (Const Always) -> VS { v }
-        | V (N n), V (O v | Const v) -> GE { n; v }
+        | V (V v), V (Const Always) -> VS { v }
+        | V (N n), V (V v | Const v) -> GE { n; v }
         | _ -> Top)
     | ApplyIntrin
         {
@@ -410,7 +410,7 @@ module Rewriter = struct
         let d = Eval.eval (flip FlagDomain.read m) d in
         match (a, b, c, d) with
         | V (C c), V (Const Always), V (Z z), V (Const Never) -> HI { c; z }
-        | V (N n), V (O v | Const v), V (Z z), V (Const Never) -> GT { n; v; z }
+        | V (N n), V (V v | Const v), V (Z z), V (Const Never) -> GT { n; v; z }
         | _ -> Top)
     | UnaryExpr { op = `BoolNOT; arg } -> (
         match extract_condition m (Expr.BasilExpr.unfix arg) with
@@ -607,10 +607,10 @@ prog entry @main;
 
     [
        block %main [
-         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(extract(32,0, $R0), 0x1:bv32)), bvadd(sign_extend(32, extract(32,0, $R0)), 0x1:bv64)))) { .flag_semantics_$PSTATE_V = "(O (Sum (extract(32,0, $R0), 0x1:bv32)))" };
-         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(bvadd(extract(32,0, $R0), 0xfffffffd:bv32), 0x1:bv32)), bvadd(bvadd(sign_extend(32, extract(32,0, $R0)), 0xfffffffffffffffd:bv64), 0x1:bv64)))) { .flag_semantics_$PSTATE_V = "(O (Diff (extract(32,0, $R0), 0x2:bv32)))" };
-         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(bvadd(extract(32,0, $R0), bvnot(bvshl(extract(32,0, $R1), zero_extend(20, 0x0:bv12)))), 0x1:bv32)), bvadd(bvadd(sign_extend(32, extract(32,0, $R0)), sign_extend(32, bvnot(bvshl(extract(32,0, $R1), zero_extend(20, 0x0:bv12))))), 0x1:bv64)))) { .flag_semantics_$PSTATE_V = "(O (Diff (extract(32,0, $R0), extract(32,0, $R1))))" };
-         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(local_31:bv32, bvshl(local_32:bv32, zero_extend(20, 0x0:bv12)))), bvadd(sign_extend(32, local_31:bv32), sign_extend(32, bvshl(local_32:bv32, zero_extend(20, 0x0:bv12))))))) { .flag_semantics_$PSTATE_V = "(O (Sum (local_31:bv32, local_32:bv32)))" };
+         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(extract(32,0, $R0), 0x1:bv32)), bvadd(sign_extend(32, extract(32,0, $R0)), 0x1:bv64)))) { .flag_semantics_$PSTATE_V = "(V (Sum (extract(32,0, $R0), 0x1:bv32)))" };
+         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(bvadd(extract(32,0, $R0), 0xfffffffd:bv32), 0x1:bv32)), bvadd(bvadd(sign_extend(32, extract(32,0, $R0)), 0xfffffffffffffffd:bv64), 0x1:bv64)))) { .flag_semantics_$PSTATE_V = "(V (Diff (extract(32,0, $R0), 0x2:bv32)))" };
+         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(bvadd(extract(32,0, $R0), bvnot(bvshl(extract(32,0, $R1), zero_extend(20, 0x0:bv12)))), 0x1:bv32)), bvadd(bvadd(sign_extend(32, extract(32,0, $R0)), sign_extend(32, bvnot(bvshl(extract(32,0, $R1), zero_extend(20, 0x0:bv12))))), 0x1:bv64)))) { .flag_semantics_$PSTATE_V = "(V (Diff (extract(32,0, $R0), extract(32,0, $R1))))" };
+         $PSTATE_V:bv1 := bvnot(booltobv1(eq(sign_extend(32, bvadd(local_31:bv32, bvshl(local_32:bv32, zero_extend(20, 0x0:bv12)))), bvadd(sign_extend(32, local_31:bv32), sign_extend(32, bvshl(local_32:bv32, zero_extend(20, 0x0:bv12))))))) { .flag_semantics_$PSTATE_V = "(V (Sum (local_31:bv32, local_32:bv32)))" };
          $PSTATE_C:bv1 := bvnot(booltobv1(eq(zero_extend(32, bvadd(extract(32,0, $R0), 0x1:bv32)), bvadd(zero_extend(32, extract(32,0, $R0)), 0x1:bv64)))) { .flag_semantics_$PSTATE_C = "(C (Sum (extract(32,0, $R0), 0x1:bv32)))" };
          $PSTATE_C:bv1 := bvnot(booltobv1(eq(zero_extend(32, bvadd(bvadd(extract(32,0, $R0), 0xfffffffd:bv32), 0x1:bv32)), bvadd(bvadd(zero_extend(32, extract(32,0, $R0)), 0xfffffffd:bv64), 0x1:bv64)))) { .flag_semantics_$PSTATE_C = "(C (Diff (extract(32,0, $R0), 0x2:bv32)))" };
          $PSTATE_C:bv1 := bvnot(booltobv1(eq(zero_extend(32, bvadd(bvadd(extract(32,0, $R0), bvnot(bvshl(extract(32,0, $R1), zero_extend(20, 0x0:bv12)))), 0x1:bv32)), bvadd(bvadd(zero_extend(32, extract(32,0, $R0)), zero_extend(32, bvnot(bvshl(extract(32,0, $R1), zero_extend(20, 0x0:bv12))))), 0x1:bv64)))) { .flag_semantics_$PSTATE_C = "(C (Diff (extract(32,0, $R0), extract(32,0, $R1))))" };
@@ -731,7 +731,7 @@ prog entry @main;
          $PSTATE_C:bv1 := bvnot(booltobv1(eq(zero_extend(32, bvadd(extract(32,0, $R0), 0x1:bv32)), bvadd(zero_extend(32, extract(32,0, $R0)), 0x1:bv64))));
          $PSTATE_Z:bv1 := booltobv1(eq(bvadd(extract(32,0, $R0), 0x1:bv32), 0x0:bv32));
          $PSTATE_N:bv1 := extract(32,31, bvadd(extract(32,0, $R0), 0x1:bv32));
-         assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)) { .flag_semantics_$PSTATE_C = "(C (Sum (extract(32,0, $R0), 0x1:bv32)))"; .flag_semantics_$PSTATE_N = "(N (Sum (extract(32,0, $R0), 0x1:bv32)))"; .flag_semantics_$PSTATE_V = "(O (Sum (extract(32,0, $R0), 0x1:bv32)))"; .flag_semantics_$PSTATE_Z = "(Z (Sum (extract(32,0, $R0), 0x1:bv32)))" };
+         assume booland(eq($PSTATE_N, $PSTATE_V), eq($PSTATE_Z, 0x0:bv1)) { .flag_semantics_$PSTATE_C = "(C (Sum (extract(32,0, $R0), 0x1:bv32)))"; .flag_semantics_$PSTATE_N = "(N (Sum (extract(32,0, $R0), 0x1:bv32)))"; .flag_semantics_$PSTATE_V = "(V (Sum (extract(32,0, $R0), 0x1:bv32)))"; .flag_semantics_$PSTATE_Z = "(Z (Sum (extract(32,0, $R0), 0x1:bv32)))" };
          goto (%ret);
        ];
        block %ret [ return; ]
