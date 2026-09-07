@@ -363,10 +363,10 @@ module Rewriter = struct
       We track one computation for each flag read, noting that sometimes not all
       flags will be computed in the same way. *)
   type t =
-    | EQ of FlagSemantics.computation
-    | CS of FlagSemantics.computation
-    | MI of FlagSemantics.computation
-    | VS of FlagSemantics.computation
+    | EQ of { z : FlagSemantics.computation }
+    | CS of { c : FlagSemantics.computation }
+    | MI of { n : FlagSemantics.computation }
+    | VS of { v : FlagSemantics.computation }
     | HI of { c : FlagSemantics.computation; z : FlagSemantics.computation }
     | GE of { n : FlagSemantics.computation; v : FlagSemantics.computation }
     | GT of {
@@ -388,11 +388,11 @@ module Rewriter = struct
         let arg1 = Eval.eval (flip FlagDomain.read m) arg1 in
         let arg2 = Eval.eval (flip FlagDomain.read m) arg2 in
         match (arg1, arg2) with
-        | V (Z c), V (Const Always) -> EQ c
-        | V (C c), V (Const Always) -> CS c
-        | V (N c), V (Const Always) -> MI c
-        | V (O c), V (Const Always) -> VS c
-        | V (N c), V (O c' | Const c') -> GE { n = c; v = c' }
+        | V (Z z), V (Const Always) -> EQ { z }
+        | V (C c), V (Const Always) -> CS { c }
+        | V (N n), V (Const Always) -> MI { n }
+        | V (O v), V (Const Always) -> VS { v }
+        | V (N n), V (O v | Const v) -> GE { n; v }
         | _ -> Top)
     | ApplyIntrin
         {
@@ -409,10 +409,8 @@ module Rewriter = struct
         let c = Eval.eval (flip FlagDomain.read m) c in
         let d = Eval.eval (flip FlagDomain.read m) d in
         match (a, b, c, d) with
-        | V (C c), V (Const Always), V (Z c'), V (Const Never) ->
-            HI { c; z = c' }
-        | V (N c), V (O c' | Const c'), V (Z c''), V (Const Never) ->
-            GT { n = c; v = c'; z = c'' }
+        | V (C c), V (Const Always), V (Z z), V (Const Never) -> HI { c; z }
+        | V (N n), V (O v | Const v), V (Z z), V (Const Never) -> GT { n; v; z }
         | _ -> Top)
     | UnaryExpr { op = `BoolNOT; arg } -> (
         match extract_condition m (Expr.BasilExpr.unfix arg) with
@@ -437,34 +435,34 @@ module Rewriter = struct
       | _ -> None
     in
     match cond with
-    | EQ (Diff (e, e')) -> Some (binexp ~op:`EQ e e')
-    | EQ (Sum (e, e')) -> Some (binexp ~op:`EQ e (unexp ~op:`BVNEG e'))
-    | EQ (Expr e) -> zero_of e |> Option.map (binexp ~op:`EQ e)
-    | CS (Diff (e, e')) -> Some (binexp ~op:`BVULE e' e)
-    | CS (Sum (e, e')) -> Some (binexp ~op:`BVULE (unexp ~op:`BVNEG e') e)
-    | MI c ->
-        let e = value c in
+    | EQ { z = Diff (e, e') } -> Some (binexp ~op:`EQ e e')
+    | EQ { z = Sum (e, e') } -> Some (binexp ~op:`EQ e (unexp ~op:`BVNEG e'))
+    | EQ { z = Expr e } -> zero_of e |> Option.map (binexp ~op:`EQ e)
+    | CS { c = Diff (e, e') } -> Some (binexp ~op:`BVULE e' e)
+    | CS { c = Sum (e, e') } -> Some (binexp ~op:`BVULE (unexp ~op:`BVNEG e') e)
+    | MI { n } ->
+        let e = value n in
         zero_of e |> Option.map (binexp ~op:`BVSLT e)
     (* | VS c -> failwith "overflow rewrite is complicated" *)
-    | HI { c = Diff (e, e') as c; z = c' } when equiv_computations c c' ->
+    | HI { c = Diff (e, e') as c; z } when equiv_computations c z ->
         Some (binexp ~op:`BVULT e' e)
-    | HI { c = Sum (e, e') as c; z = c' } when equiv_computations c c' ->
+    | HI { c = Sum (e, e') as c; z } when equiv_computations c z ->
         Some (binexp ~op:`BVULT (unexp ~op:`BVNEG e') e)
-    | GE { n = Diff (e, e') as c; v = c' } when equiv_computations c c' ->
+    | GE { n = Diff (e, e') as c; v } when equiv_computations c v ->
         Some (binexp ~op:`BVSLE e' e)
-    | GE { n = Sum (e, e') as c; v = c' } when equiv_computations c c' ->
+    | GE { n = Sum (e, e') as c; v } when equiv_computations c v ->
         Some (binexp ~op:`BVSLE (unexp ~op:`BVNEG e') e)
-    | GE { n = c; v = Never } ->
-        let e = value c in
+    | GE { n; v = Never } ->
+        let e = value n in
         zero_of e |> Option.map (fun zero -> binexp ~op:`BVSLE zero e)
-    | GT { n = Diff (e, e') as c; v = c'; z = c'' }
-      when equiv_computations c c' && equiv_computations c c'' ->
+    | GT { n = Diff (e, e') as n; v; z }
+      when equiv_computations n v && equiv_computations n z ->
         Some (binexp ~op:`BVSLT e' e)
-    | GT { n = Sum (e, e') as c; v = c'; z = c'' }
-      when equiv_computations c c' && equiv_computations c c'' ->
+    | GT { n = Sum (e, e') as n; v; z }
+      when equiv_computations n v && equiv_computations n z ->
         Some (binexp ~op:`BVSLT (unexp ~op:`BVNEG e') e)
-    | GT { n = c; v = Never; z = c' } when equiv_computations c c' ->
-        let e = value c in
+    | GT { n; v = Never; z } when equiv_computations n z ->
+        let e = value n in
         zero_of e |> Option.map (fun zero -> binexp ~op:`BVSLT zero e)
     | Not cond -> (
         let open Expr.AbstractExpr in
