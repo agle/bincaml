@@ -938,3 +938,17 @@ module BlockGraph = struct
         in
         g)
 end
+
+(** Iterator of variables mentioned in specification,
+    {b may repeat equal varibales}. *)
+let free_vars_specification spec =
+  let open Iter in
+  append_l
+    [
+      of_list spec.modifies_globs;
+      of_list spec.captures_globs;
+      of_list spec.requires |> flat_map Expr.BasilExpr.free_vars_iter;
+      of_list spec.ensures |> flat_map Expr.BasilExpr.free_vars_iter;
+      of_list spec.rely |> flat_map Expr.BasilExpr.free_vars_iter;
+      of_list spec.guarantee |> flat_map Expr.BasilExpr.free_vars_iter;
+    ]
