@@ -358,7 +358,7 @@ module Eval = Analysis.Intra_analysis.EvalExpr (FlagLattice)
     conditions. *)
 module Rewriter = struct
   (** A type of condition as described in
-      https://support.arm.com/documentation/dui0231/b/arm-instruction-reference/conditional-execution
+      https://support.arm.com/documentation/ddi0487/mc/-Part-C-The-AArch64-Instruction-Set/-Chapter-C1-The-A64-Instruction-Set/-C1-2-Structure-of-the-A64-assembler-language/-C1-2-4-Condition-code?lang=en
 
       We track one computation for each flag read, noting that sometimes not all
       flags will be computed in the same way. *)
